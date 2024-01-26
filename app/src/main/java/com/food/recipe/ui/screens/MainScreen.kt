@@ -69,6 +69,7 @@ fun MainScreen(selectCategory: (String) -> Unit) {
 
 
     Column(
+        
         modifier = Modifier
             .fillMaxSize()
             .background(color = colorResource(id = R.color.bg))
