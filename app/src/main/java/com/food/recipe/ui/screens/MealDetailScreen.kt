@@ -10,10 +10,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
@@ -27,7 +25,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,24 +35,31 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.food.recipe.R
+import com.food.recipe.data.model.MealRecipeResponse
 import com.food.recipe.data.model.RecipeModel
 import com.food.recipe.ui.viewmodel.RecipeViewModel
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.glide.GlideImage
 
 @Composable
-fun MealDetailScreen(meal: String, onBackPress: () -> Unit) {
+fun MealDetailScreen(
+    viewModel: RecipeViewModel,
+    meal: String,
+    onBackPress: () -> Unit
+) {
 
+    val mealItem by viewModel.mealItem.observeAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchMealByMealId(meal)
+    }
 
     var title by remember { mutableStateOf("") }
 
@@ -94,7 +98,7 @@ fun MealDetailScreen(meal: String, onBackPress: () -> Unit) {
 
         }
 
-        GetMealDataByMeal(meal = meal) {
+        GetMealDataByMeal(mealItem) {
             title = it
         }
 
@@ -104,17 +108,9 @@ fun MealDetailScreen(meal: String, onBackPress: () -> Unit) {
 
 @Composable
 fun GetMealDataByMeal(
-    meal: String,
-    viewModel: RecipeViewModel = viewModel(),
+    mealItem: MealRecipeResponse?,
     onDataFetched: (String) -> Unit
 ) {
-
-    // val recipes by viewModel.recipes.observeAsState(emptyList())
-    val mealItem by viewModel.mealItem.observeAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.fetchMealByMealId(meal)
-    }
 
     Log.e("TAG", "mealItem : ${mealItem?.meals?.size}")
 

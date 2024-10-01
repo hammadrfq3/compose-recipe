@@ -1,6 +1,5 @@
 package com.food.recipe.ui.screens
 
-import android.R.attr.maxLines
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -9,7 +8,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -37,9 +35,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.food.recipe.R
 import com.food.recipe.data.model.Meal
+import com.food.recipe.data.model.MealResponse
 import com.food.recipe.ui.viewmodel.RecipeViewModel
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.components.rememberImageComponent
@@ -48,7 +46,18 @@ import com.skydoves.landscapist.placeholder.shimmer.ShimmerPlugin
 
 
 @Composable
-fun MealScreen(category:String,selectMeal: (Meal) -> Unit,onBackPress: () -> Unit){
+fun MealScreen(
+    viewModel: RecipeViewModel,
+    category:String,selectMeal: (Meal) -> Unit,
+    onBackPress: () -> Unit
+){
+
+    val recipes by viewModel.meals.observeAsState()
+
+    LaunchedEffect(Unit) {
+        Log.e("TAG", "fetchMeals API request")
+        viewModel.fetchMealsByCategory(category)
+    }
 
     Column(
         modifier = Modifier
@@ -86,22 +95,15 @@ fun MealScreen(category:String,selectMeal: (Meal) -> Unit,onBackPress: () -> Uni
             }
         }
 
-        GetMealsDataByCategory(category = category, selectMeal = selectMeal)
+        GetMealsDataByCategory(recipes,selectMeal = selectMeal)
 
     }
 
 }
 
 @Composable
-fun GetMealsDataByCategory(category: String,viewModel: RecipeViewModel = viewModel(),selectMeal: (Meal) -> Unit){
+fun GetMealsDataByCategory(recipes: MealResponse?,selectMeal: (Meal) -> Unit){
 
-    // val recipes by viewModel.recipes.observeAsState(emptyList())
-    val recipes by viewModel.meals.observeAsState()
-
-    LaunchedEffect(Unit) {
-        Log.e("TAG", "fetchMeals API request")
-        viewModel.fetchMealsByCategory(category)
-    }
 
     Log.e("TAG", "meals : ${recipes?.meals?.size}")
 

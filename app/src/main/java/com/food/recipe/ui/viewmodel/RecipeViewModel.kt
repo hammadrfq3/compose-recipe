@@ -2,10 +2,7 @@ package com.food.recipe.ui.viewmodel
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,14 +11,20 @@ import com.food.recipe.data.model.Category
 import com.food.recipe.data.model.CategoryResponse
 import com.food.recipe.data.model.MealRecipeResponse
 import com.food.recipe.data.model.MealResponse
-import com.food.recipe.data.repo.RecipeRepository
+import com.food.recipe.domain.repository.RecipeRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class RecipeViewModel : ViewModel() {
-    private val repository = RecipeRepository()
+@HiltViewModel
+class RecipeViewModel @Inject constructor(
+    private val repository: RecipeRepository
+): ViewModel() {
+    //private val repository = RecipeRepository()
 
-    var searchText by mutableStateOf("")
+    private var _searchText = mutableStateOf("")
+    var searchText : MutableState<String> = _searchText
 
     fun getCategoriesByFilter(searchText:String){
         viewModelScope.launch{
@@ -53,11 +56,11 @@ class RecipeViewModel : ViewModel() {
 
     fun fetchCategoriesIfNeeded() {
         if (!categoriesFetched) {
-            fetchCategories(searchText)
+            fetchCategories()
         }
     }
 
-     private fun fetchCategories(searchText: String) {
+     private fun fetchCategories() {
         viewModelScope.launch {
             try {
                 val cat = repository.getCategories()

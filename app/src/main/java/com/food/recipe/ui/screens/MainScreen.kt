@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -55,18 +54,24 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.food.recipe.R
 import com.food.recipe.data.model.Category
+import com.food.recipe.data.model.CategoryResponse
 import com.food.recipe.ui.viewmodel.RecipeViewModel
-import com.skydoves.flexible.bottomsheet.material3.FlexibleBottomSheet
-import com.skydoves.flexible.core.FlexibleSheetSize
-import com.skydoves.flexible.core.rememberFlexibleBottomSheetState
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.components.rememberImageComponent
 import com.skydoves.landscapist.glide.GlideImage
 import com.skydoves.landscapist.placeholder.shimmer.ShimmerPlugin
 
 @Composable
-fun MainScreen(selectCategory: (String) -> Unit) {
+fun MainScreen(viewModel: RecipeViewModel,selectCategory: (String) -> Unit) {
 
+    // val recipes by viewModel.recipes.observeAsState(emptyList())
+    val data by viewModel.categories.observeAsState()
+    val filteredList by viewModel.categoriesLocal.collectAsState(data?.categories)
+
+    LaunchedEffect(Unit) {
+        Log.e("TAG", "fetchCategories API request")
+        viewModel.fetchCategoriesIfNeeded()
+    }
 
     Column(
         
@@ -102,9 +107,11 @@ fun MainScreen(selectCategory: (String) -> Unit) {
             lineHeight = 35.sp
         )
 
-        MyEdittext()
+        MyEdittext{ changedText ->
+            viewModel.getCategoriesByFilter(changedText)
+        }
 
-        SetData(selectCategory = selectCategory)
+        SetData(filteredList,selectCategory = selectCategory)
 
     }
 
@@ -112,9 +119,9 @@ fun MainScreen(selectCategory: (String) -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyEdittext(viewModel: RecipeViewModel = viewModel()) {
+fun MyEdittext(onTextChanged: (String) -> Unit = {}) {
 
-    var text by remember { mutableStateOf(viewModel.searchText) }
+    var text by remember { mutableStateOf("") }
     var isShowBottomSheet by remember { mutableStateOf(false) }
 
     /*if (isShowBottomSheet){
@@ -131,9 +138,10 @@ fun MyEdittext(viewModel: RecipeViewModel = viewModel()) {
         TextField(
             value = text,
             onValueChange = {
-                viewModel.searchText = it
+                //viewModel.searchText = it
                 text = it
-                viewModel.getCategoriesByFilter(viewModel.searchText)
+                onTextChanged.invoke(text)
+                //viewModel.getCategoriesByFilter(viewModel.searchText)
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -214,17 +222,8 @@ fun ShowBottomSheet(onDismiss: () -> Unit){
 }
 
 @Composable
-fun SetData(viewModel: RecipeViewModel = viewModel(), selectCategory: (String) -> Unit) {
+fun SetData(filteredList: List<Category>?, selectCategory: (String) -> Unit) {
 
-    // val recipes by viewModel.recipes.observeAsState(emptyList())
-    val data by viewModel.categories.observeAsState()
-
-    val filteredList by viewModel.categoriesLocal.collectAsState(data?.categories)
-
-    LaunchedEffect(Unit) {
-        Log.e("TAG", "fetchCategories API request")
-        viewModel.fetchCategoriesIfNeeded()
-    }
 
     Log.e("TAG", "Recipes : ${filteredList?.size}")
 

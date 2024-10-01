@@ -9,10 +9,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.food.recipe.ui.navigation.Navigation
 import com.food.recipe.ui.theme.RecipeTheme
 import com.food.recipe.ui.viewmodel.RecipeViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    private val viewModel: RecipeViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
